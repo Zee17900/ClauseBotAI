@@ -45,9 +45,13 @@ const ContractGenerator = () => {
     setFormData({ ...formData, [name]: date });
   };
 
+  const showLoginPrompt = () => {
+    alert("⚠️ You must be logged in to generate, save, or download a contract.");
+  };
+
   const generateContract = async () => {
     if (!user) {
-      alert("You must be logged in to generate a contract.");
+      showLoginPrompt();
       return;
     }
 
@@ -130,7 +134,10 @@ const ContractGenerator = () => {
           </div>
         ))}
 
-        <button onClick={generateContract} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg mt-4">
+        <button
+          onClick={user ? generateContract : showLoginPrompt}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg mt-4"
+        >
           {loading ? "Generating..." : "Generate Contract"}
         </button>
 
@@ -145,13 +152,13 @@ const ContractGenerator = () => {
             />
 
             <div className="flex justify-between mt-4">
-              <button className="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700">
+              <button className="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700" onClick={user ? () => {} : showLoginPrompt}>
                 Save Free (With Watermark)
               </button>
-              <button className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700">
+              <button className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700" onClick={user ? () => {} : showLoginPrompt}>
                 Upgrade to Remove Watermark
               </button>
-              <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+              <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700" onClick={user ? () => {} : showLoginPrompt}>
                 Download Free (With Watermark)
               </button>
             </div>
