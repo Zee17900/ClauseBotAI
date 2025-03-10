@@ -18,9 +18,18 @@ const ContractGenerator = () => {
   const [isSaved, setIsSaved] = useState(false);
   const navigate = useNavigate();
 
+  // ✅ **Restored all contract fields**
   const contractFields = {
     "Rental Agreement": ["Landlord Name", "Tenant Name", "Property Address", "Monthly Rent", "Lease Start Date", "Lease End Date"],
     "Employment Agreement": ["Employer Name", "Employee Name", "Job Title", "Job Responsibilities", "Salary Amount", "Start Date", "Employment Type", "Termination Notice Period"],
+    "Partnership Agreement": ["Partner 1 Name", "Partner 2 Name", "Business Name", "Business Address", "Profit Sharing Percentage", "Responsibilities of Each Partner", "Start Date", "Dissolution Terms"],
+    "Service Contract": ["Service Provider Name", "Client Name", "Service Description", "Payment Terms", "Service Duration", "Termination Clause"],
+    "Freelance Contract": ["Freelancer Name", "Client Name", "Project Description", "Payment Amount", "Project Deadline", "Rights and Ownership", "Termination Clause"],
+    "Non-Disclosure Agreement (NDA)": ["Disclosing Party", "Receiving Party", "Purpose of NDA", "Confidentiality Duration", "Penalty for Breach"],
+    "Sales Agreement": ["Seller Name", "Buyer Name", "Product/Service Description", "Price", "Payment Terms", "Delivery Date", "Return & Refund Policy"],
+    "Consulting Agreement": ["Consultant Name", "Client Name", "Scope of Work", "Payment Structure", "Duration of Agreement", "Confidentiality Clause"],
+    "Independent Contractor Agreement": ["Contractor Name", "Client Name", "Work Description", "Payment Details", "Work Completion Date", "Independent Status Clause"],
+    "Loan Agreement": ["Lender Name", "Borrower Name", "Loan Amount", "Interest Rate", "Repayment Terms", "Loan Start Date", "Late Payment Penalties"],
   };
 
   const handleChange = (e) => {
@@ -148,18 +157,6 @@ const ContractGenerator = () => {
 
         <button onClick={generateContract} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg">{loading ? "Generating..." : "Generate Contract"}</button>
       </div>
-
-      {generatedContract && (
-        <div className="mt-6 w-full max-w-lg">
-          <h2 className="text-xl font-bold mb-4">Generated Contract</h2>
-          <textarea className="w-full p-4 bg-gray-800 text-white rounded-lg" rows="10" value={editableContract} onChange={(e) => setEditableContract(e.target.value)} />
-          <div className="flex justify-between mt-4">
-            <button onClick={() => saveContract(false)} className="bg-gray-600 text-white py-2 px-4 rounded-lg">Save Free (With Watermark)</button>
-            <button onClick={() => navigate("/payment")} className="bg-green-600 text-white py-2 px-4 rounded-lg">Upgrade to Remove Watermark</button>
-            <button onClick={() => downloadPDF(false)} className="bg-blue-600 text-white py-2 px-4 rounded-lg">Download Free (With Watermark)</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
