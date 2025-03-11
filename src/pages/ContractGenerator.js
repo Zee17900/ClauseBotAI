@@ -45,13 +45,9 @@ const ContractGenerator = () => {
     setFormData({ ...formData, [name]: date });
   };
 
-  const showLoginPrompt = () => {
-    alert("⚠️ You must be logged in to generate, save, or download a contract.");
-  };
-
   const generateContract = async () => {
     if (!user) {
-      showLoginPrompt();
+      alert("You must be logged in to generate a contract.");
       return;
     }
 
@@ -97,74 +93,84 @@ const ContractGenerator = () => {
     setLoading(false);
   };
 
+  const saveContract = async (isPaid) => {
+    if (!user) {
+      alert("You must be logged in to save a contract.");
+      return;
+    }
+
+    try {
+      const contractRef = collection(db, "users", user.uid, "contracts");
+      await addDoc(contractRef, {
+        contractType,
+        contractText: editableContract,
+        isPaid,
+        createdAt: new Date(),
+      });
+
+      setIsSaved(true);
+      alert(isPaid ? "Contract saved without watermark!" : "Contract saved with watermark.");
+      window.dispatchEvent(new Event("contractSaved"));
+    } catch (error) {
+      console.error("Error saving contract:", error);
+      alert("Failed to save contract.");
+    }
+  };
+
+  const downloadPDF = (isPaid) => {
+    if (!user) {
+      alert("You must be logged in to download a contract.");
+      return;
+    }
+
+    const doc = new jsPDF();
+    const maxLineWidth = 180;
+    const marginLeft = 15;
+    const pageHeight = doc.internal.pageSize.height;
+    let y = 20;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(12);
+
+    const splitText = doc.splitTextToSize(editableContract, maxLineWidth);
+
+    splitText.forEach((line) => {
+      if (y > pageHeight - 20) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(line, marginLeft, y);
+      y += 7;
+    });
+
+    if (!isPaid) {
+      doc.setFontSize(30);
+      doc.setTextColor(200, 200, 200);
+      doc.text("ClauseBot AI - Free Version", 35, pageHeight / 2, { angle: 45 });
+    }
+
+    doc.save(`${contractType}.pdf`);
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-6">
       <h1 className="text-3xl font-bold mb-6">Generate a Contract</h1>
-      <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-lg">
-        <label className="block text-sm mb-2">Contract Type:</label>
-        <select
-          className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
-          value={contractType}
-          onChange={(e) => setContractType(e.target.value)}
-        >
-          {Object.keys(contractFields).map((type) => (
-            <option key={type}>{type}</option>
-          ))}
-        </select>
+      <button onClick={generateContract} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg mt-4">
+        {loading ? "Generating..." : "Generate Contract"}
+      </button>
 
-        {contractFields[contractType].map((field) => (
-          <div key={field}>
-            <label className="block text-sm mb-2">{field}:</label>
-            {field.toLowerCase().includes("date") ? (
-              <DatePicker
-                selected={formData[field] || null}
-                onChange={(date) => handleDateChange(date, field)}
-                className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
-                dateFormat="yyyy-MM-dd"
-              />
-            ) : (
-              <input
-                type="text"
-                name={field}
-                className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
-                value={formData[field] || ""}
-                onChange={handleChange}
-              />
-            )}
+      {generatedContract && (
+        <div className="mt-6 w-full">
+          <div className="flex justify-between mt-4">
+            <button onClick={() => saveContract(false)} className="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700">
+              Save Free (With Watermark)
+            </button>
+            <button onClick={() => downloadPDF(false)} className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+              Download Free (With Watermark)
+            </button>
           </div>
-        ))}
-
-        <button
-          onClick={user ? generateContract : showLoginPrompt}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg mt-4"
-        >
-          {loading ? "Generating..." : "Generate Contract"}
-        </button>
-
-        {generatedContract && (
-          <div className="mt-6 w-full">
-            <h2 className="text-xl font-bold mb-4">Generated Contract</h2>
-            <textarea
-              className="w-full p-4 bg-gray-800 text-white rounded-lg"
-              rows="10"
-              value={editableContract}
-              readOnly
-            />
-
-            <div className="flex justify-between mt-4">
-              <button className="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700" onClick={user ? () => {} : showLoginPrompt}>
-                Save Free (With Watermark)
-              </button>
-              <button className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700" onClick={user ? () => {} : showLoginPrompt}>
-                Upgrade to Remove Watermark
-              </button>
-              <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700" onClick={user ? () => {} : showLoginPrompt}>
-                Download Free (With Watermark)
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
